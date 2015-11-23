@@ -176,7 +176,6 @@ youtubeBestVideo.findBestMusicVideo = function(title, duration, cb) {
 
   search(title, {key: apiKey}, function(err, results) {
 
-    console.log(results);
     if(err) cb(err);
     var bestOne = null;
     var bestRating = 0;
