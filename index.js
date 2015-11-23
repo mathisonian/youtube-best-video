@@ -1,4 +1,4 @@
-var youtubeSearch = require('youtube-search');
+var search = require('youtube-search');
 
 var youtubeBestVideo = {};
 
@@ -70,7 +70,7 @@ var _blacklistWordsFilter = function(video, title) {
   var blacklist = ['cover', 'live'];
 
   for(var i = 0; i < blacklist.length; i++) {
-    if(video.title.toLowerCase().indexOf(blacklist[i]) > -1 
+    if(video.title.toLowerCase().indexOf(blacklist[i]) > -1
       || (video.description && video.description.toLowerCase().indexOf(blacklist[i]) > -1)) {
       return 0;
     }
@@ -91,7 +91,7 @@ var _whitelistWordsFilter = function(video, title) {
   var rating = 0;
 
   for(var i = 0; i < whitelist.length; i++) {
-    if(video.title.toLowerCase().indexOf(whitelist[i]) > -1 
+    if(video.title.toLowerCase().indexOf(whitelist[i]) > -1
       || (video.description && video.description.toLowerCase().indexOf(whitelist[i]) > -1)) {
       rating += 1 / whitelist.length;
     }
@@ -160,23 +160,28 @@ var _getRating = function(video, title) {
   return rating;
 }
 
+var apiKey;
+
 youtubeBestVideo.findBestMusicVideo = function(title, duration, cb) {
   if ('function' === typeof duration) {
     cb = duration;
     duration = undefined;
   }
 
-  var filters = [_videoTitleFilter, _viewCountFilter, _whitelistWordsFilter, _blacklistWordsFilter];
+  var filters = [_videoTitleFilter, /*_viewCountFilter,*/ _whitelistWordsFilter, _blacklistWordsFilter];
 
   if (duration) {
     filters.push(_videoDurationFilter);
   }
-  
-  youtubeSearch.search(title, {}, function(err, results) {
+
+  search(title, {key: apiKey}, function(err, results) {
+
+    // console.log(results);
     if(err) cb(err);
     var bestOne = null;
     var bestRating = 0;
     // If there are results
+
     if (results !== undefined && results.length>0) {
       results.forEach(function(result, index) {
         var rating = 0;
@@ -192,6 +197,7 @@ youtubeBestVideo.findBestMusicVideo = function(title, duration, cb) {
 
         if(index === results.length - 1) {
           cb(null, bestOne);
+          return;
         }
       });
     }
@@ -202,4 +208,7 @@ youtubeBestVideo.findBestMusicVideo = function(title, duration, cb) {
   });
 };
 
-module.exports = youtubeBestVideo;
+module.exports = function(key) {
+  apiKey = key;
+  return youtubeBestVideo;
+};
